@@ -125,6 +125,11 @@ parts:
       do
         patch -i $file -p 1
       done
+      # The snap sandbox has no access to the Electron app executable path,
+      # so replace app.getPath('exe') with the snap instance name for the
+      # "copy dev mode command" feature.
+      sed -i "s|const appPath = app.getPath('exe');|const appPath = process.env.SNAP_INSTANCE_NAME;|" \
+        ${CRAFT_PART_SRC}/packages/app-desktop/commands/copyDevCommand.ts
     override-build: |
       if [ -n "${http_proxy:-}" ]; then # Sorts out network proxy issues on Launchpad builds
         export ELECTRON_GET_USE_PROXY=1
