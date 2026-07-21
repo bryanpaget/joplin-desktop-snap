@@ -117,7 +117,6 @@ parts:
       - curl
     build-snaps:
       - node/24/stable
-      - rustup
     override-pull: |
       craftctl default
       craftctl set version=$(git describe --tags)
@@ -138,7 +137,10 @@ parts:
         export YARN_HTTP_PROXY="${http_proxy:-}"
         export YARN_HTTPS_PROXY="${http_proxy:-}"
       fi
-      rustup default stable # Prepare Rust environment for OneNote Converter
+      # Install Rust via the official shell script to avoid GLIBC conflicts
+      # caused by the rustup snap picking up the gnome-sdk's libc.so.6
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+      export PATH="${HOME}/.cargo/bin:${PATH}"
       yarn install
       cd ${CRAFT_PART_BUILD}/packages/app-desktop
       yarn run dist
